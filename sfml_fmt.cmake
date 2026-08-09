@@ -304,7 +304,8 @@ import utilities;
 
 int main(){
 
-    fmt::println("Project Template");
+    fmt::println("Hello, from main.cpp");
+    module_to_main();
     
     return 0;
 }]==]
@@ -316,7 +317,11 @@ file(WRITE utilities.ixx
 #include<fmt/format.h>
 #include<SFML/Graphics.hpp>
 
-export module utilities;]==]
+export module utilities;
+
+export void module_to_main(){
+    fmt::println("Hello, to main, from utilities.ixx");
+}]==]
 )
 
 file(WRITE vcpkg.json
@@ -329,4 +334,29 @@ file(WRITE vcpkg.json
     ],
     "builtin-baseline": "e861f04798ca54fa70ff906b5e43e5fc99b7f406"
 }]==]
+)
+
+set(CONFIGURE_PRESET "linux-clang")
+
+message(STATUS "Configuring generated project... ")
+
+execute_process(
+    COMMAND 
+        "${CMAKE_COMMAND}"
+        --preset "${CONFIGURE_PRESET}"
+
+    WORKING_DIRECTORY
+        "${PROJECT_ROOT}"
+
+    RESULT_VARIABLE CONFIGURE_RESULT
+)
+if(NOT CONFIGURE_RESULT EQUAL 0)
+    message(FATAL_ERROR "Configuration failed with exit code: ${CONFIGURE_RESULT}")
+endif()
+
+message(STATUS "project configured successfully")
+
+execute_process(
+    COMMAND 
+        ln -sfn ./build/linux-clang/compile_commands.json compile_commands.json
 )
